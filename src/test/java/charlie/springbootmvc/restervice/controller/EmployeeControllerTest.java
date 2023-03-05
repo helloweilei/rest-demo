@@ -1,33 +1,27 @@
 package charlie.springbootmvc.restervice.controller;
 
-import charlie.springbootmvc.restervice.model.Employee;
+import charlie.springbootmvc.restervice.model.EmployeeDTO;
 import charlie.springbootmvc.restervice.services.EmployeeService;
 import charlie.springbootmvc.restervice.services.EmployeeServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hamcrest.core.Is;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.util.Assert;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.FactoryBasedNavigableListAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -59,7 +53,7 @@ class EmployeeControllerTest {
     public void testCreateJSON() throws JsonProcessingException {
         // ObjectMapper objectMapper = new ObjectMapper();
         // objectMapper.findAndRegisterModules();
-        Employee testEmployee = Employee.builder()
+        EmployeeDTO testEmployee = EmployeeDTO.builder()
                 .role("Dev")
                 .id(UUID.randomUUID())
                 .name("test Employee")
@@ -71,13 +65,13 @@ class EmployeeControllerTest {
 
     @Test
     void getEmployeeById() throws Exception {
-        Employee testEmployee = Employee.builder()
+        EmployeeDTO testEmployee = EmployeeDTO.builder()
                 .role("Dev")
                 .id(UUID.randomUUID())
                 .name("test Employee")
                 .age(29)
                 .build();
-        when(employeeService.getById(testEmployee.getId())).thenReturn(testEmployee);
+        when(employeeService.getById(testEmployee.getId())).thenReturn(Optional.of(testEmployee));
         mockMvc.perform(get("/api/v1/employees/" + testEmployee.getId())
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -89,7 +83,7 @@ class EmployeeControllerTest {
     @Test
     public void getEmployees() throws Exception {
         EmployeeServiceImpl employeeService1 = new EmployeeServiceImpl();
-        List<Employee> testEmployees = employeeService1.listEmployees();
+        List<EmployeeDTO> testEmployees = employeeService1.listEmployees();
         when(employeeService.listEmployees()).thenReturn(testEmployees);
         mockMvc.perform(get("/api/v1/employees").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -99,12 +93,12 @@ class EmployeeControllerTest {
 
     @Test
     public void testCreateEmployee() throws Exception {
-        Employee newEmployee = Employee.builder()
+        EmployeeDTO newEmployee = EmployeeDTO.builder()
                 .role("Dev")
                 .name("test Employee")
                 .age(29)
                 .build();
-        Employee createdEmployee = Employee.builder()
+        EmployeeDTO createdEmployee = EmployeeDTO.builder()
                 .role("Dev")
                 .name("test Employee")
                 .age(29)
@@ -122,12 +116,13 @@ class EmployeeControllerTest {
 
     @Test
     public void testUpdateEmployee() throws Exception {
-        Employee newEmployee = Employee.builder()
+        EmployeeDTO newEmployee = EmployeeDTO.builder()
                 .role("Dev")
                 .name("test Employee")
                 .age(29)
                 .build();
         UUID id = UUID.randomUUID();
+        when(employeeService.updateById(any(), any())).thenReturn(Optional.of(EmployeeDTO.builder().build()));
         mockMvc.perform(put("/api/v1/employees/" + id)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -139,6 +134,7 @@ class EmployeeControllerTest {
     @Test
     public void testDeleteEmployee() throws Exception {
         UUID id = UUID.randomUUID();
+        when(employeeService.deleteById(any())).thenReturn(true);
         mockMvc.perform(delete("/api/v1/employees/" + id).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
         ArgumentCaptor<UUID> uuidCapture = ArgumentCaptor.forClass(UUID.class);
@@ -149,7 +145,7 @@ class EmployeeControllerTest {
     @Test
     public void testPatchEmployee() throws Exception {
         UUID id = UUID.randomUUID();
-        Employee empInfo = Employee.builder()
+        EmployeeDTO empInfo = EmployeeDTO.builder()
                 .name("test").build();
         mockMvc.perform(patch("/api/v1/employees/" + id)
                 .accept(MediaType.APPLICATION_JSON)
@@ -158,7 +154,7 @@ class EmployeeControllerTest {
                 .andExpect(status().isNoContent());
 
         ArgumentCaptor<UUID> uuidCapture = ArgumentCaptor.forClass(UUID.class);
-        ArgumentCaptor<Employee> employeeArgumentCaptor = ArgumentCaptor.forClass(Employee.class);
+        ArgumentCaptor<EmployeeDTO> employeeArgumentCaptor = ArgumentCaptor.forClass(EmployeeDTO.class);
         verify(employeeService).patchEmployee(uuidCapture.capture(), employeeArgumentCaptor.capture());
         assertEquals(id, uuidCapture.getValue());
         assertEquals(empInfo, employeeArgumentCaptor.getValue());
@@ -167,7 +163,7 @@ class EmployeeControllerTest {
     @Test
     public void testNotFoundException() throws Exception {
         UUID id = UUID.randomUUID();
-        when(employeeService.getById(id)).thenThrow(NotFoundException.class);
+        when(employeeService.getById(id)).thenReturn(Optional.empty());
         mockMvc.perform(get("/api/v1/employees/{employeeId}", id))
                 .andExpect(status().isNotFound());
     }

@@ -1,18 +1,19 @@
 package charlie.springbootmvc.restervice.services;
 
-import charlie.springbootmvc.restervice.model.Employee;
+import charlie.springbootmvc.restervice.model.EmployeeDTO;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface EmployeeService {
-    List<Employee> listEmployees();
-    Employee getById(UUID id);
+    List<EmployeeDTO> listEmployees();
+    Optional<EmployeeDTO> getById(UUID id);
 
-    Employee newEmployee(Employee employee);
+    EmployeeDTO newEmployee(EmployeeDTO employee);
 
-    void updateById(UUID id, Employee employee);
+    Optional<EmployeeDTO> updateById(UUID id, EmployeeDTO employee);
 
-    void deleteById(UUID id);
-    Employee patchEmployee(UUID id, Employee employee);
+    boolean deleteById(UUID id);
+    EmployeeDTO patchEmployee(UUID id, EmployeeDTO employee);
 }
