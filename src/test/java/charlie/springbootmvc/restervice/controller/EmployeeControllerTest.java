@@ -13,6 +13,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.Instant;
@@ -112,6 +114,19 @@ class EmployeeControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().stringValues("Location", "/api/v1/employees/" + createdEmployee.getId()));
 
+    }
+
+    @Test
+    public void testEmployeeNameValidation() throws Exception {
+        EmployeeDTO employeeDTO = EmployeeDTO.builder()
+                .age(23).build();
+        MvcResult mvcResult = mockMvc.perform(post("/api/v1/employees")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(employeeDTO)))
+                .andExpect(status().isBadRequest()).andReturn();
+
+        System.out.println(mvcResult.getResponse().getContentAsString());
     }
 
     @Test

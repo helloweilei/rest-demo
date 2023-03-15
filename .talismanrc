@@ -1,4 +1,14 @@
 fileignoreconfig:
 - filename: mvnw
   checksum: 525d6897dc14f8a1884cdb1cfd0fdf8179230a04afcddca9158c09040117ae85
+- filename: src/main/resources/db/migration/V1__create_employee_table.sql
+  checksum: 55067ecb7be92ace162db775bbcaa5366fdfc761bfec435c766e3ee1c2a8f7e9
+- filename: src/main/resources/db/migration/V2__add_email_to_empolyee.sql
+  checksum: 41f56f311ede50e450d80aa5141a5df0f5c42612ae50f4f06debdc781df51579
+- filename: src/main/resources/db/migration/V3__add_date_to_empolyee.sql
+  checksum: 30f9ce90116bb5401f131dcaa90575ef88b0aadeabc0becaed328b28b5f0f6de
+- filename: src/scripts/mysql-init.sql
+  checksum: 0114ede15d693a2956e67e2695ce4e8170f3bacc699263caea2addbbd705a733
+- filename: src/main/resources/application.properties
+  checksum: 6b8b07526c459ad99d3dbce4e747939db3cee3291162962e65e9f9dea4db1499
 version: ""

@@ -18,9 +18,10 @@ class EmployeeRepositoryTest {
     public void testCreateEmployee() {
         Employee saved = employeeRepository.save(
                 Employee.builder()
-                        .name("Wei lei")
+                        .name("Wei lei 123")
                         .build()
         );
+        employeeRepository.flush();
         Assertions.assertThat(saved).isNotNull();
         Assertions.assertThat(saved.getId()).isInstanceOf(UUID.class);
     }

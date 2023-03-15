@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,8 +43,9 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity<EmployeeDTO> createEmployee(@RequestBody EmployeeDTO employee) {
+    public ResponseEntity<EmployeeDTO> createEmployee(@Validated @RequestBody EmployeeDTO employee) {
         EmployeeDTO savedEmployee = this.employeeService.newEmployee(employee);
+
         HttpHeaders headers = new HttpHeaders();
         headers.add("Location", "/api/v1/employees/" + savedEmployee.getId());
         return new ResponseEntity<>(savedEmployee, headers, HttpStatus.CREATED);

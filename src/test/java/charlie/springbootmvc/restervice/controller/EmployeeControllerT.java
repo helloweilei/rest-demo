@@ -4,16 +4,31 @@ import charlie.springbootmvc.restervice.entities.Employee;
 import charlie.springbootmvc.restervice.mappers.EmployeeMapper;
 import charlie.springbootmvc.restervice.model.EmployeeDTO;
 import charlie.springbootmvc.restervice.repository.EmployeeRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import org.hamcrest.core.Is;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.web.JsonPath;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MockMvcBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import javax.net.ssl.SSLEngineResult;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,6 +46,34 @@ class EmployeeControllerApiTest {
 
     @Autowired
     EmployeeMapper employeeMapper;
+
+    @Autowired
+    WebApplicationContext webApplicationContext;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    MockMvc mockMvc;
+
+    @BeforeEach
+     void setup() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    }
+
+    @Test
+    public void testJpaValidation() throws Exception {
+        EmployeeDTO employeeDTO = EmployeeDTO.builder()
+                .name("weilei").build();
+        var result = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/employees")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(employeeDTO)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()", Is.is(1)))
+                .andReturn();
+
+        System.out.println(result.getResponse().getContentAsString(StandardCharsets.UTF_8));
+    }
 
     @Test
     public void testListEmployees() {
@@ -118,4 +161,5 @@ class EmployeeControllerApiTest {
     public void testDeleteNotExisting() {
         assertThrows(NotFoundException.class, () -> employeeController.deleteById(UUID.randomUUID()));
     }
+
 }
